@@ -34,9 +34,11 @@ class StyledLabel(QLabel):
     def change_background(self, state_code):
         if state_code == self.id:
             self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.background))
+            print('dlog/change background, id: %s, text: %s' % (self.id, self.text))
         else:
             self.setStyleSheet(self.styleSheet() + 'background-color: None;')
 
+    @pyqtSlot()
     def reset_background(self):
         self.setStyleSheet(self.styleSheet() + 'background-color: None;')
 
@@ -49,6 +51,9 @@ class StyledLabel(QLabel):
 
     def make_connection(self, data_loader):
         data_loader.connect(self.change_background)
+
+    def make_reset(self, signal):
+        signal.connect(self.reset_background)
 
 
 class ImgLabel(QLabel):
@@ -87,7 +92,11 @@ class ImgLabel(QLabel):
 
     @pyqtSlot()
     def reset(self):
-        self.reload_image('./data/white.png')
+        path = './data/white.png'
+        print("dlog/reload image, path: %s" % (path))
+        self.img_path = path
+        pixmap = self.make_pixmap()
+        self.setPixmap(pixmap)
 
     def make_connection(self, data_loader):
         data_loader.connect(self.reload_image)
@@ -97,7 +106,7 @@ class ImgLabel(QLabel):
 
 
 class DataLoader(QObject):
-    def __init__(self, ):
+    def __init__(self):
         super().__init__()
 
     inputLoaded = pyqtSignal(str)

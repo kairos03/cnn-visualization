@@ -48,6 +48,7 @@ class App(QWidget):
             top_widgets[i].make_connection(self.data_loader.inputLoaded)
             top_widgets[i].make_connection(self.data_loader.convLoaded)
             top_widgets[i].make_connection(self.data_loader.outputLoaded)
+            top_widgets[i].make_reset(self.data_loader.reset)
 
         # top layout
         lay_top = QHBoxLayout()
@@ -61,6 +62,7 @@ class App(QWidget):
         # input
         input_image = ImgLabel(img_width=200, img_height=200, post_fix='input.png')
         input_image.make_connection(self.data_loader.inputLoaded)
+        input_image.make_reset(self.data_loader.reset)
         f_input = self.box_layout_frame_builder([input_image], 'Input Image')
 
         # conv widgets
@@ -76,6 +78,7 @@ class App(QWidget):
             for j in range(layer_size[i]):
                 img = ImgLabel(img_width=50, img_height=50, post_fix='Conv%d-%02d.png' % (i+1, j+1))
                 img.make_connection(self.data_loader.convLoaded)
+                img.make_reset(self.data_loader.reset)
                 imgs.append(img)
 
             layer_image.append(imgs)
@@ -90,9 +93,12 @@ class App(QWidget):
                         StyledLabel('Stator', id='1', border=self.border, background='yellow'),
                         StyledLabel('Roter', id='2', border=self.border, background='orange'),
                         StyledLabel('Bearing', id='3', border=self.border, background='red')]
+
+        # make connection
         for w in output_label:
             w.reset_background()
             w.make_connection(self.data_loader.outputLoaded)
+            w.make_reset(self.data_loader.reset)
         f_output = self.box_layout_frame_builder(output_label)
 
         # center layout
@@ -171,21 +177,22 @@ class QDataThread(QThread):
         self.data_loader = DataLoader()
 
     def run(self):
-        for i in range(3):
+        for i in range(2):
             time.sleep(1)
             print(i)
         self.data_loader.on_input_data_loaded('./data/ex1/')
-        for i in range(3):
+        for i in range(2):
             time.sleep(1)
             print(i)
         self.data_loader.on_conv_data_loaded('./data/ex1/fmaps/')
-        for i in range(3):
+        for i in range(2):
             time.sleep(1)
             print(i)
         self.data_loader.on_output_data_loaded("0")
-        for i in range(3):
+        for i in range(2):
             time.sleep(1)
             print(i)
+        self.data_loader.on_reset()
 
 
 if __name__ == '__main__':
