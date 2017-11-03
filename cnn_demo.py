@@ -38,15 +38,16 @@ class App(QWidget):
         # top widgets
         top_widgets = [StyledLabel('Data Convert', border=self.border, background='skyblue', id='./data/ex1/'),
                        StyledLabel('CNN Featuring', border=self.border, background='skyblue', id='./data/ex1/fmaps/'),
-                       StyledLabel('Prediction', border=self.border, background='skyblue', id=None)]
+                       StyledLabel('Prediction', border=self.border, background='skyblue', id='0' or '1' or '2' or '3')]
 
         for w in top_widgets:
             w.reset_background()
 
         # connect event
-        top_widgets[0].make_connection(self.data_loader.inputLoaded)
-        top_widgets[1].make_connection(self.data_loader.convLoaded)
-        top_widgets[2].make_connection(self.data_loader.outputLoaded)
+        for i in range(3):
+            top_widgets[i].make_connection(self.data_loader.inputLoaded)
+            top_widgets[i].make_connection(self.data_loader.convLoaded)
+            top_widgets[i].make_connection(self.data_loader.outputLoaded)
 
         # top layout
         lay_top = QHBoxLayout()
@@ -85,10 +86,10 @@ class App(QWidget):
         f_conv = self.box_layout_frame_builder(conv_widgets, layout=QHBoxLayout, no_stretch=True)
 
         # output
-        output_label = [StyledLabel('Normal', id=0, border=self.border, background='green'),
-                        StyledLabel('Stator', id=1, border=self.border, background='yellow'),
-                        StyledLabel('Roter', id=2, border=self.border, background='orange'),
-                        StyledLabel('Bearing', id=3, border=self.border, background='red')]
+        output_label = [StyledLabel('Normal', id='0', border=self.border, background='green'),
+                        StyledLabel('Stator', id='1', border=self.border, background='yellow'),
+                        StyledLabel('Roter', id='2', border=self.border, background='orange'),
+                        StyledLabel('Bearing', id='3', border=self.border, background='red')]
         for w in output_label:
             w.reset_background()
             w.make_connection(self.data_loader.outputLoaded)
@@ -182,6 +183,9 @@ class QDataThread(QThread):
             time.sleep(1)
             print(i)
         self.data_loader.on_output_data_loaded("0")
+        for i in range(3):
+            time.sleep(1)
+            print(i)
 
 
 if __name__ == '__main__':
