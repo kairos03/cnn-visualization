@@ -9,7 +9,7 @@ from PyQt5.QtGui import *
 
 class StyledLabel(QLabel):
 
-    def __init__(self, text, id=None, font_size='20pt', color='black', background=None, highlight='green', border=None):
+    def __init__(self, text, id=None, font_size='20pt', color='black', background=None, highlight=None, border=None):
         super().__init__()
 
         self.text = text
@@ -30,17 +30,54 @@ class StyledLabel(QLabel):
         self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.background))
         self.setStyleSheet(self.styleSheet() + 'border: %s;' % (self.border))
 
-    @pyqtSlot(str)
-    def change_background(self, state_code):
-        if state_code == self.id:
-            self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.background))
-            print('dlog/change background, id: %s, text: %s' % (self.id, self.text))
+
+class TopLabel(StyledLabel):
+
+    def __init__(self, text, id):
+        super().__init__(text, id=id, highlight='skyblue', border='1px solid black')
+
+    @pyqtSlot(int)
+    def highlighting(self, state):
+        if state == self.id:
+            self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.highlight))
         else:
             self.setStyleSheet(self.styleSheet() + 'background-color: None;')
+        print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.height))
 
-    @pyqtSlot()
-    def reset_background(self):
-        self.setStyleSheet(self.styleSheet() + 'background-color: None;')
+    def blink(self):
+        for i in range(5):
+            self.set_background(self.highlight)
+            time.sleep(0.5)
+            self.set_background(self.background)
+            time.sleep(0.5)
+
+    def make_connection(self, data_loader):
+        data_loader.connect(self.highlighting)
+
+
+class ResultLabel(StyledLabel):
+
+    def __init__(self, text, id):
+        super().__init__(text, id=id, border='1px solid black')
+
+    @pyqtSlot(int, float)
+    def change_background(self, state, value):
+
+        if state == self.id:
+            if state == 0:
+                self.background = 'green'
+            elif value >= 1.0:
+                self.background = 'red'
+            elif value >= 0.98:
+                self.background = 'orange'
+            else:
+                self.background = 'yellow'
+
+            self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.background))
+
+        else:
+            self.setStyleSheet(self.styleSheet() + 'background-color: None;')
+        print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.background))
 
     def blink(self):
         for i in range(5):
@@ -52,14 +89,12 @@ class StyledLabel(QLabel):
     def make_connection(self, data_loader):
         data_loader.connect(self.change_background)
 
-    def make_reset(self, signal):
-        signal.connect(self.reset_background)
-
 
 class ImgLabel(QLabel):
 
-    def __init__(self, img_path=None, post_fix='', img_width=None, img_height=None):
+    def __init__(self, id=None, img_path=None, post_fix='', img_width=None, img_height=None):
         super().__init__()
+        self.id = id
         self.default_path = './data/white.png'
         self.post_fix = post_fix
         self.img_path = img_path + post_fix if img_path is not None else self.default_path
@@ -82,46 +117,48 @@ class ImgLabel(QLabel):
             self.img_height = pixmap.height()
         return pixmap
 
-    @pyqtSlot(str)
-    def reload_image(self, img_path):
-        path = img_path + self.post_fix
-        print("dlog/reload image, path: %s" % (path))
-        self.img_path = path
-        pixmap = self.make_pixmap()
-        self.setPixmap(pixmap)
+    @pyqtSlot(int, str)
+    def reload_image(self, layer, img_path):
+        if layer == self.id:
+            if img_path != './data/white.png':
+                img_path = img_path + self.post_fix
 
-    @pyqtSlot()
-    def reset(self):
-        path = './data/white.png'
-        print("dlog/reload image, path: %s" % (path))
-        self.img_path = path
-        pixmap = self.make_pixmap()
-        self.setPixmap(pixmap)
+            self.img_path = img_path
+            pixmap = self.make_pixmap()
+            self.setPixmap(pixmap)
+
+            print("dlog/reload image, layer: %s, path: %s" % (layer, img_path))
 
     def make_connection(self, data_loader):
         data_loader.connect(self.reload_image)
-
-    def make_reset(self, signal):
-        signal.connect(self.reset)
 
 
 class DataLoader(QObject):
     def __init__(self):
         super().__init__()
 
-    inputLoaded = pyqtSignal(str)
-    convLoaded = pyqtSignal(str)
-    outputLoaded = pyqtSignal(str)
-    reset = pyqtSignal()
+    setState = pyqtSignal(int)
 
-    def on_input_data_loaded(self, path):
-        self.inputLoaded.emit(path)
-
-    def on_conv_data_loaded(self, path):
-        self.convLoaded.emit(path)
-
-    def on_output_data_loaded(self, state_code):
-        self.outputLoaded.emit(state_code)
+    inputImagePathLoaded = pyqtSignal(int, str)
+    convImagePathLoaded = pyqtSignal(int, str)
+    outputStateValueLoaded = pyqtSignal(int, float)
 
     def on_reset(self):
-        self.reset.emit()
+        self.setState.emit(0)
+        self.inputImagePathLoaded.emit(0, './data/white.png')
+        self.convImagePathLoaded.emit(0, './data/white.png')
+        self.outputStateValueLoaded.emit(-1, 0)
+        self.setState.emit(1)
+
+    def on_input_data_loaded(self, path):
+        self.inputImagePathLoaded.emit(0, path)
+
+    def on_conv_data_loaded(self, path):
+        self.setState.emit(2)
+        for i in range(1, 5):
+            self.convImagePathLoaded.emit(i, path)
+            time.sleep(0.3)
+
+    def on_output_data_loaded(self, state_code, value):
+        self.setState.emit(3)
+        self.outputStateValueLoaded.emit(state_code, value)

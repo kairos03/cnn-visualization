@@ -26,7 +26,6 @@ class App(QWidget):
         self.top = 10
         self.width = 1200
         self.height = 800
-        self.border = '1px solid black'
 
         # dataLoader
         self.data_loader = data_loader
@@ -36,19 +35,11 @@ class App(QWidget):
     def init_ui(self):
 
         # top widgets
-        top_widgets = [StyledLabel('Data Convert', border=self.border, background='skyblue', id='./data/ex1/'),
-                       StyledLabel('CNN Featuring', border=self.border, background='skyblue', id='./data/ex1/fmaps/'),
-                       StyledLabel('Prediction', border=self.border, background='skyblue', id='0' or '1' or '2' or '3')]
-
-        for w in top_widgets:
-            w.reset_background()
+        top_widgets = [TopLabel('Data Convert', 1), TopLabel('CNN Featuring', 2), TopLabel('Prediction', 3)]
 
         # connect event
         for i in range(3):
-            top_widgets[i].make_connection(self.data_loader.inputLoaded)
-            top_widgets[i].make_connection(self.data_loader.convLoaded)
-            top_widgets[i].make_connection(self.data_loader.outputLoaded)
-            top_widgets[i].make_reset(self.data_loader.reset)
+            top_widgets[i].make_connection(self.data_loader.setState)
 
         # top layout
         lay_top = QHBoxLayout()
@@ -60,9 +51,8 @@ class App(QWidget):
 
         # center widgets
         # input
-        input_image = ImgLabel(img_width=200, img_height=200, post_fix='input.png')
-        input_image.make_connection(self.data_loader.inputLoaded)
-        input_image.make_reset(self.data_loader.reset)
+        input_image = ImgLabel(id=0, img_width=200, img_height=200, post_fix='input.png')
+        input_image.make_connection(self.data_loader.inputImagePathLoaded)
         f_input = self.box_layout_frame_builder([input_image], 'Input Image')
 
         # conv widgets
@@ -76,9 +66,8 @@ class App(QWidget):
 
             # make images
             for j in range(layer_size[i]):
-                img = ImgLabel(img_width=50, img_height=50, post_fix='Conv%d-%02d.png' % (i+1, j+1))
-                img.make_connection(self.data_loader.convLoaded)
-                img.make_reset(self.data_loader.reset)
+                img = ImgLabel(id=i+1, img_width=50, img_height=50, post_fix='Conv%d-%02d.png' % (i+1, j+1))
+                img.make_connection(self.data_loader.convImagePathLoaded)
                 imgs.append(img)
 
             layer_image.append(imgs)
@@ -89,16 +78,14 @@ class App(QWidget):
         f_conv = self.box_layout_frame_builder(conv_widgets, layout=QHBoxLayout, no_stretch=True)
 
         # output
-        output_label = [StyledLabel('Normal', id='0', border=self.border, background='green'),
-                        StyledLabel('Stator', id='1', border=self.border, background='yellow'),
-                        StyledLabel('Roter', id='2', border=self.border, background='orange'),
-                        StyledLabel('Bearing', id='3', border=self.border, background='red')]
+        output_label = [ResultLabel('Normal', 0),
+                        ResultLabel('Stator', 1),
+                        ResultLabel('Roter', 2),
+                        ResultLabel('Bearing', 3)]
 
         # make connection
         for w in output_label:
-            w.reset_background()
-            w.make_connection(self.data_loader.outputLoaded)
-            w.make_reset(self.data_loader.reset)
+            w.make_connection(self.data_loader.outputStateValueLoaded)
         f_output = self.box_layout_frame_builder(output_label)
 
         # center layout
@@ -177,6 +164,7 @@ class QDataThread(QThread):
         self.data_loader = DataLoader()
 
     def run(self):
+        self.data_loader.on_reset()
         for i in range(2):
             time.sleep(1)
             print(i)
@@ -188,11 +176,10 @@ class QDataThread(QThread):
         for i in range(2):
             time.sleep(1)
             print(i)
-        self.data_loader.on_output_data_loaded("0")
+        self.data_loader.on_output_data_loaded(0, 0.97)
         for i in range(2):
             time.sleep(1)
             print(i)
-        self.data_loader.on_reset()
 
 
 if __name__ == '__main__':
