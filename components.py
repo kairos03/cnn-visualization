@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+IS_DEBUG = False
+
 
 class StyledLabel(QLabel):
 
@@ -42,7 +44,9 @@ class TopLabel(StyledLabel):
             self.setStyleSheet(self.styleSheet() + 'background-color: %s;' % (self.highlight))
         else:
             self.setStyleSheet(self.styleSheet() + 'background-color: None;')
-        print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.height))
+
+        if IS_DEBUG:
+            print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.height))
 
     def blink(self):
         for i in range(5):
@@ -77,7 +81,9 @@ class ResultLabel(StyledLabel):
 
         else:
             self.setStyleSheet(self.styleSheet() + 'background-color: None;')
-        print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.background))
+
+        if IS_DEBUG:
+            print('dlog/change background, id: %s, text: %s, color: %s' % (self.id, self.text, self.background))
 
     def blink(self):
         for i in range(5):
@@ -128,7 +134,8 @@ class ImgLabel(QLabel):
             pixmap = self.make_pixmap()
             self.setPixmap(pixmap)
 
-            print("dlog/reload image, layer: %s, path: %s" % (layer, img_path))
+            if IS_DEBUG:
+                print("dlog/reload image, layer: %s, path: %s" % (layer, img_path))
 
     def make_connection(self, data_loader):
         data_loader.connect(self.reload_image)
