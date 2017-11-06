@@ -180,6 +180,7 @@ class QDataThread(QThread):
         for i in range(2):
             time.sleep(1)
             print(i)
+        self.data_loader.on_reset()
 
 
 if __name__ == '__main__':

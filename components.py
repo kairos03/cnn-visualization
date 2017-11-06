@@ -119,8 +119,9 @@ class ImgLabel(QLabel):
 
     @pyqtSlot(int, str)
     def reload_image(self, layer, img_path):
-        if layer == self.id:
-            if img_path != './data/white.png':
+
+        if layer == self.id or layer == 0:
+            if img_path != self.default_path:
                 img_path = img_path + self.post_fix
 
             self.img_path = img_path
