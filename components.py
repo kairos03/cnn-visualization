@@ -2,9 +2,9 @@
 
 import time
 
-from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 IS_DEBUG = False
 
@@ -164,8 +164,8 @@ class DataLoader(QObject):
     def on_conv_data_loaded(self, path):
         self.setState.emit(2)
         for i in range(1, 5):
-            self.convImagePathLoaded.emit(i, path)
             time.sleep(0.3)
+            self.convImagePathLoaded.emit(i, path)
 
     def on_output_data_loaded(self, state_code, value):
         self.setState.emit(3)
