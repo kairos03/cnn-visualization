@@ -165,22 +165,26 @@ class QDataThread(QThread):
 
     def run(self):
         self.data_loader.on_reset()
-        for i in range(2):
+
+        for i in range(20):
             time.sleep(1)
             print(i)
+
         self.data_loader.on_input_data_loaded('./data/ex1/')
-        for i in range(2):
-            time.sleep(1)
-            print(i)
+        time.sleep(0.5)
         self.data_loader.on_conv_data_loaded('./data/ex1/fmaps/')
-        for i in range(2):
-            time.sleep(1)
-            print(i)
+        time.sleep(0.5)
         self.data_loader.on_output_data_loaded(0, 0.97)
-        for i in range(2):
-            time.sleep(1)
-            print(i)
+        time.sleep(5)
+
         self.data_loader.on_reset()
+        time.sleep(3)
+        self.data_loader.on_input_data_loaded('./data/ex1/')
+        time.sleep(0.5)
+        self.data_loader.on_conv_data_loaded('./data/ex1/fmaps/')
+        time.sleep(0.5)
+        self.data_loader.on_output_data_loaded(3, 0.97)
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
