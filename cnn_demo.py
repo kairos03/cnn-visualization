@@ -4,12 +4,6 @@
 # images appear when input event emitted
 
 import sys
-import os
-
-import time
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 
 from components import *
 
